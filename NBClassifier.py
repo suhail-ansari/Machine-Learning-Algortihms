@@ -102,18 +102,12 @@ class NBClassifier(object):
         return predicted_class#, max_prob
 
 def main(train_file_path, test_file_path):
-    #train_file_path = sys.argv[1]
-    #test_file_path = sys.argv[2]
 
     train_file_csv_reader = csv.reader(open(train_file_path, 'r'))
     test_file_csv_reader = csv.reader(open(test_file_path, 'r'))
     
     nbClassifier = NBClassifier()
     nbClassifier.train(list(train_file_csv_reader))
-
-    #print nbClassifier.attr_count 
-    #print nbClassifier.data_by_class
-    #print nbClassifier.gaussian_vars
 
     test_passed = 0
     test_failed = 0
@@ -129,5 +123,4 @@ def main(train_file_path, test_file_path):
     return nbClassifier
 
 if __name__ == "__main__":
-
     main(sys.argv[1], sys.argv[2])

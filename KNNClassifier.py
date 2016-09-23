@@ -3,6 +3,8 @@ import csv
 import math
 import numpy as np
 
+from collections import OrderedDict, Counter
+
 class KNNClassifier(object):
     def __init__(self):
         pass
@@ -22,8 +24,8 @@ class KNNClassifier(object):
         for i in range(self.attr_count):
             temp_np_array = self.processed_data[:, i]
             mean = temp_np_array.mean()
-            var = temp_np_array.var()
-            self.vars.append({'mean': mean, 'var': var})
+            var = temp_np_array.std(ddof=0)
+            self.vars.append({'mean': mean, 'var': var})#math.sqrt(var)})
     
     def normalize_data(self):
         self.normalized_data = np.array([[(float(x) - self.vars[i]['mean'])/self.vars[i]['var'] for i, x in enumerate(row[1:-1])] for row in self.raw_data])
@@ -34,10 +36,12 @@ class KNNClassifier(object):
         
         for class_name, normalized_data in zip([int(x[-1]) for x in self.raw_data], self.normalized_data):
             distance = 0.0
-            for i, x in enumerate(data):
-                normalized_x = (x - self.vars[i]['mean'])/self.vars[i]['var']
-                distance += metric(normalized_x, normalized_data[i])
+            
+            normalized_test_data = [((x - self.vars[i]['mean'])/self.vars[i]['var']) for i, x in enumerate(data)]
+            distance = metric(normalized_test_data, normalized_data)
+
             res.append([class_name, distance])
+
         res.sort(lambda a, b: 1 if a[1] > b[1] else -1)
         if row in self.raw_data:
             return self.get_max_freq(res[1:k+1])
@@ -46,47 +50,61 @@ class KNNClassifier(object):
         
 
     def _reducer(self, x, y):
-        x[y] = 1 + x.get(y, 0)
-        return x
+        if not x.get(y):
+            return x
         
     def get_max_freq(self, arr):
-        return max(reduce(self._reducer, [x[0] for x in arr], {}))
+        res_distances = {}
+        res_counter = Counter()
+
+        for _class, distance in arr:
+            if not res_distances.get(_class):
+                res_distances[_class] = 0
+            res_counter[_class] += 1
+            res_distances[_class] += distance
         
-    def L1(self, x, y):
-        return math.sqrt(pow(x-y, 2))
-    
+        most_common_key, max_count = res_counter.most_common()[0]
+        keys_to_check =[]
+        for k, v in res_counter.most_common():
+            if v < max_count:
+                break
+            else:
+                keys_to_check.append(k)
+        
+        min_distance = sys.maxint
+        pred = None
+        for k in keys_to_check:
+            if res_distances[k]/float(k) < min_distance:
+                min_distance = res_distances[k]/float(k)
+                pred = k                
+        return k
+        
     def L2(self, x, y):
-        return abs(x-y)
+        return math.sqrt(sum(map(lambda (i, j) : pow(i - j, 2), zip(x, y))))
+    
+    def L1(self, x, y):
+        return sum(map(lambda (i, j): abs(i-j), zip(x, y)))
 
 def main(train_file_path, test_file_path, k):
-    #train_file_path = sys.argv[1]
-    #test_file_path = sys.argv[2]
-
+    
     train_file_csv_reader = csv.reader(open(train_file_path, 'r'))
     test_file_csv_reader = csv.reader(open(test_file_path, 'r'))
     
     knnClassifier = KNNClassifier()
     knnClassifier.train(list(train_file_csv_reader))
 
-    #print nbClassifier.attr_count 
-    #print nbClassifier.data_by_class
-    #print nbClassifier.gaussian_vars
-
     test_passed = 0
     test_failed = 0
 
     for row in test_file_csv_reader:
         nn = knnClassifier.test(row, knnClassifier.L2, k)
-        #print nn
         print "actual class: {}, knn: {}".format(row[-1], nn)
-        #break
-        """if predicted_class == row[-1]:
-            test_passed +=1
+        if int(row[-1]) == int(nn):
+            test_passed += 1
         else:
             test_failed += 1
-        print "actual_class: {}, predicted_class: {}".format(row[-1], predicted_class)
-    print "passed: {}, failed: {}, accuracy: {}%".format(test_passed, test_failed, ((test_passed)/float(test_passed + test_failed))*100) 
-    return nbClassifier"""
+    print "accuracy: {}%".format(test_passed*100/float(test_failed + test_passed))
+
     return knnClassifier
 
 if __name__ == "__main__":
