@@ -4,7 +4,7 @@ from scipy.stats import mstats
 class LinearRegression(object):
     def __init__(self):
         """
-        Create Ridge Regressor Instance
+        Create Linear Regressor Instance
         """
         pass
     
