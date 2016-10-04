@@ -1,14 +1,22 @@
 import numpy as np
-from sklearn.datasets import load_boston
 from scipy.stats import mstats
-
-from utils import split_data
 
 class RidgeRegression(object):
     def __init__(self):
+        """
+        Create Ridge Regressor Instance
+        """
         pass
     
     def fit(self, train_data, train_target, l):
+        """
+        fit training data
+
+        Parameters:
+            X: Training Data
+            Y: Target Values
+            l: Lambda
+        """
         self.means = np.mean(train_data, axis=0)
         self.std_devs = np.std(train_data, axis=0)
 
@@ -20,17 +28,45 @@ class RidgeRegression(object):
         self.W = np.linalg.pinv(X.T.dot(X) - (l*np.eye(X.shape[1], X.shape[1]))).dot(X.T).dot(Y)
     
     def predict(self, test_data):
+        """
+        predict values from sample data
+        
+        Parameters:
+            X: Testing Data
+        
+        Returns:
+            P: Predicted Values
+        """
         temp_data = np.ones(shape=(test_data.shape[0], test_data.shape[1] + 1))
         for i, column in enumerate(test_data.T):
             temp_data[:, i + 1] =  (column - self.means[i])/self.std_devs[i]
         return temp_data.dot(self.W)
     
     def mse(self, test_data, test_target):
+        """
+        Mean Square Error of predicted values and actual target values  
+        
+        Parameters:
+            X: Testing Data
+            Y: Actual Target Values
+        
+        Returns:
+            E: Mean Square Error
+        """
+        
         p = self.predict(test_data)
         loss = p - test_target
         return (np.square(loss).sum())/test_data.shape[0]
 
 def main():
+
+    def split_data(data_set, ratio=0.9):
+        N = data_set.data.shape[0]
+        i, j = int(N*ratio), int(N*(1 - ratio))
+        return data_set.data[:i], data_set.target[:i], data_set.data[:j], data_set.target[:j]
+
+    from sklearn.datasets import load_boston
+
     data_set = load_boston()
 
     train_data, train_target, test_data, test_target = split_data(data_set)
