@@ -1,1 +1,1 @@
-# Implementation of Machine Learning Algorithms for USC CSCI 567 Machine Learning class 
+Implementation of Machine Learning Algorithms for USC CSCI 567 Machine Learning class 
