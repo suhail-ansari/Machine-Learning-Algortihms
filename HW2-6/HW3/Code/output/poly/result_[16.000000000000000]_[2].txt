@@ -1,0 +1,21 @@
+
+real	0m0.171s
+user	0m0.166s
+sys	0m0.003s
+0.139098
+obj = -2297.711599, rho = 0.370776
+nSV = 222, nBSV = 152
+Total nSV = 222
+*
+optimization finished, #iter = 844
+nu = 0.147043
+obj = -2453.765907, rho = 0.393932
+nSV = 239, nBSV = 160
+Total nSV = 239
+*
+optimization finished, #iter = 975
+nu = 0.143769
+obj = -2279.210399, rho = 0.418338
+nSV = 231, nBSV = 151
+Total nSV = 231
+Cross Validation Accuracy = 95.9%

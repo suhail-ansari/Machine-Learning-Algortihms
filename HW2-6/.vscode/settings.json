@@ -1,0 +1,6 @@
+{
+    "latexCompile.mainFile": "HW1.tex",
+    "latexCompile.openAfterCompile": true,
+    "latexCompile.openLogAfterError": true,
+    "latexCompile.compiler": "xelatex"
+}
